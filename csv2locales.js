@@ -7,7 +7,7 @@ function csv2jsonDirectoryConverter(cfg) {
 	var path = require('path');
 	var fs = require('fs');
 	// we should install csv module for node!
-	var csv = require('csv');
+	var parse = require('csv-parse');
 	// we should install yamljsyamljs module for node!
 	var yamljs = require('yamljs');
 
@@ -18,10 +18,22 @@ function csv2jsonDirectoryConverter(cfg) {
 	var jsonDir = cfg.outputJsonDirectory || 'output_json';
 	var ymlDir = cfg.outputYmlDirectory || 'output_yml';
 
+	var parser = parse({delimiter: ','}, function(err, data) {
+		if(err) {
+			console.log(err);
+		} else {
+			var index;
+			for(index=0; index < data.length; index++) {
+				processCsvRecord(data[index], index);
+			}
+			saveResults();
+		}
+	});
 	
 	function processCsvRecord(recordArr, index) {
-		// ignor empty
+		// ignore empty
 		if (!recordArr[0]) {
+			console.log('empty record');
 			return;
 		}
 		
@@ -34,6 +46,7 @@ function csv2jsonDirectoryConverter(cfg) {
 					};
 				}
 			}
+			console.log('languages: ' + JSON.stringify(languages));
 			return;
 		}
 		
@@ -81,43 +94,31 @@ function csv2jsonDirectoryConverter(cfg) {
 	function saveResults() {
 		var lang = {};
 		for(lang in resource) {
+			console.log('saving language: ' + lang);
 			saveLanguage(lang, resource[lang]);
 		}
 	}
 	
 	function processNextFile() {
 		var fileName = "";
+		console.log('files remaining: ' + inputFiles.length);
 		if (!inputFiles.length) {
-			//console.log(JSON.stringify(resource, null, " "));
-			console.log("all converted");
-			saveResults();
-			return;
+			return false;
 		}
 		fileName = inputFiles.pop();
-		loadFile(path.join(csvDir, fileName));
-	}
-	
-	function loadFile(fileName) {
-		// reset languages for each file
 		languages = [];
-	
-		csv()
-			.from.stream(fs.createReadStream(fileName))
-			.on('record', processCsvRecord)
-			.on('end', function(count){
-				processNextFile();
-			})
-			.on('error', function(error){
-				console.log(error.message);
-			});	
-	}	
+		console.log('reading ' + fileName);
+		fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
+		return true;
+	}
 	
 	function processFiles(err, files) {
 		if (err) {
 			throw err;
 		}
-		inputFiles = files;
-		processNextFile();
+		inputFiles = files.filter(s => s.includes('.csv'));
+		console.log('starting conversion');
+		while(processNextFile()) {}
 	}
 
 	function readDir() {
