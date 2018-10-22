@@ -7,9 +7,6 @@ Requres:
 3) csv modeule for node.js
 	Use for installation: 
 	npm install csv
-4) yamljs modeule for node.js
-	Use for installation: 
-	npm install yamljs
 4) configure modeule for node.js
 	Use for installation: 
 	npm install configure

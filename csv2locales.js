@@ -31,7 +31,7 @@ function csv2jsonDirectoryConverter(cfg) {
 	});
 	
 	function processCsvRecord(recordArr, index) {
-		// ignore empty
+		// ignore empty row
 		if (!recordArr[0]) {
 			console.log('empty record');
 			return;
@@ -55,8 +55,15 @@ function csv2jsonDirectoryConverter(cfg) {
 		var prevValue;
 		var lastKey;
 		for(var i=0; i<languages.length; i++) {
-			if (!recordArr[i+1]) {
+			if (recordArr[i+1] === false) {
 				continue;
+			}
+
+			// save empty values for key for en lang
+			// these means missing keys fall back to en if set
+			// en falls back to blank instead of printing the key
+			if (recordArr[i+1] === null && languages[i] === 'en') {
+				recordArr[i+1] = ''
 			}
 			
 			currentValue = resource[languages[i]]['translation'];
@@ -84,11 +91,13 @@ function csv2jsonDirectoryConverter(cfg) {
 	}
 
 	function saveLanguage(langName, langObj) {
+		saveFile(jsonDir, langName+'.json', JSON.stringify(langObj, null, " "));
+		/* do not save yaml
 		saveFile(jsonDir, langName+'.json', JSON.stringify(langObj['translation'], null, " "));
-
 		var tmpObj = {};
 		tmpObj[langName] = langObj['translation'];
 		saveFile(ymlDir, langName+'.yml', '---\n'+yamljs.stringify(tmpObj, 4));
+		*/
 	}
 	
 	function saveResults() {
