@@ -49,9 +49,6 @@ function csv2jsonDirectoryConverter(cfg) {
 		return true;
 	}
 
-	var parser = 
-	});
-
 	function processCsvRecord(recordArr, index) {
 		// ignore empty row
 		if (!recordArr[0]) {
