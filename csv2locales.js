@@ -7,7 +7,7 @@ function csv2jsonDirectoryConverter(cfg) {
 	var path = require('path');
 	var fs = require('fs');
 	// we should install csv module for node!
-	var parse = require('csv-parse');
+	var parse = require('csv-parse/lib/sync');
 
 	var inputFiles = [];
 	var resource = {};
@@ -43,6 +43,7 @@ function csv2jsonDirectoryConverter(cfg) {
 	}
 
 	var parser = parse({delimiter: ','}, function(err, data) {
+	  console.log('lang ' + languages[0])
 		if(err) {
 		  console.log('while processing ' + languages[0] + '.csv')
 			console.log(err);
