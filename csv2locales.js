@@ -62,12 +62,6 @@ function csv2jsonDirectoryConverter(cfg) {
 			return;
 		}
 
-    if (!resource[languages[i]] || !resource[languages[i]]['translation']){
-      resource[languages[i]] = {
-        translation : {}
-      };
-    }
-
 		var keysArr = recordArr[0].split('.');
 		var currentValue;
 		var prevValue;
@@ -76,6 +70,12 @@ function csv2jsonDirectoryConverter(cfg) {
 			if (recordArr[i+1] === false) {
 				continue;
 			}
+
+      if (!resource[languages[i]] || !resource[languages[i]]['translation']){
+        resource[languages[i]] = {
+          translation : {}
+        };
+      }
 
 			// save empty values for key for en lang
 			// these means missing keys fall back to en if set
