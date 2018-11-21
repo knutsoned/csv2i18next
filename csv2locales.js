@@ -26,6 +26,7 @@ function csv2jsonDirectoryConverter(cfg) {
 		inputFiles = files.filter(s => s.includes('.csv'));
 		console.log('starting conversion');
 		while(processNextFile()) {}
+    saveResults();
 	}
 
 	function processNextFile() {
@@ -45,7 +46,6 @@ function csv2jsonDirectoryConverter(cfg) {
     for(index=0; index < data.length; index++) {
       processCsvRecord(data[index], index);
     }
-    saveResults();
 		return true;
 	}
 
