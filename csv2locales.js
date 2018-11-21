@@ -38,22 +38,18 @@ function csv2jsonDirectoryConverter(cfg) {
 		var fileLang = fileName.substring(0, fileName.length - 4);
 		languages = [fileLang];
 		console.log('reading ' + fileName + ' for lang code ' + fileLang);
-		fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
+		// fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
+		var fileContents = fs.readFileSync(path.join(csvDir, fileName))
+		var data = parse(fileContents, {delimiter: ','})
+    var index;
+    for(index=0; index < data.length; index++) {
+      processCsvRecord(data[index], index);
+    }
+    saveResults();
 		return true;
 	}
 
-	var parser = parse({delimiter: ','}, function(err, data) {
-	  console.log('lang ' + languages[0])
-		if(err) {
-		  console.log('while processing ' + languages[0] + '.csv')
-			console.log(err);
-		} else {
-			var index;
-			for(index=0; index < data.length; index++) {
-				processCsvRecord(data[index], index);
-			}
-			saveResults();
-		}
+	var parser = 
 	});
 
 	function processCsvRecord(recordArr, index) {
