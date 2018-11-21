@@ -1,5 +1,5 @@
 // run with node.js
-// will load all files from input directory, 
+// will load all files from input directory,
 // convert them as csv2json,
 // and put results in output directory
 
@@ -41,9 +41,10 @@ function csv2jsonDirectoryConverter(cfg) {
 		fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
 		return true;
 	}
-	
+
 	var parser = parse({delimiter: ','}, function(err, data) {
 		if(err) {
+		  console.log('while processing ' + languages[0] + '.csv')
 			console.log(err);
 		} else {
 			var index;
@@ -53,27 +54,20 @@ function csv2jsonDirectoryConverter(cfg) {
 			saveResults();
 		}
 	});
-	
+
 	function processCsvRecord(recordArr, index) {
 		// ignore empty row
 		if (!recordArr[0]) {
 			console.log('empty record');
 			return;
 		}
-		
-		if (!languages.length) {
-			languages = recordArr.slice(1);
-			for(var i=0; i<languages.length; i++) {
-				if (!resource[languages[i]] || !resource[languages[i]]['translation']){
-					resource[languages[i]] = {
-						translation : {}
-					};
-				}
-			}
-			console.log('languages: ' + JSON.stringify(languages));
-			return;
-		}
-		
+
+    if (!resource[languages[i]] || !resource[languages[i]]['translation']){
+      resource[languages[i]] = {
+        translation : {}
+      };
+    }
+
 		var keysArr = recordArr[0].split('.');
 		var currentValue;
 		var prevValue;
@@ -89,7 +83,7 @@ function csv2jsonDirectoryConverter(cfg) {
 			if (recordArr[i+1] === null && languages[i] === 'en') {
 				recordArr[i+1] = ''
 			}
-			
+
 			currentValue = resource[languages[i]]['translation'];
 			for(var j=0; j<keysArr.length; j++) {
 				prevValue = currentValue;
@@ -99,7 +93,7 @@ function csv2jsonDirectoryConverter(cfg) {
 				}
 				currentValue = prevValue[lastKey];
 			}
-			
+
 			prevValue[lastKey] = recordArr[i+1];
 		}
 	}
@@ -111,7 +105,7 @@ function csv2jsonDirectoryConverter(cfg) {
   		saveFile(jsonDir, lang+'.json', JSON.stringify(resource[lang], null, " "));
 		}
 	}
-	
+
 	function saveFile(dir, fileName, data) {
 		fs.writeFile(path.join(dir, fileName), data, function(err) {
 			if(err) {
@@ -119,7 +113,7 @@ function csv2jsonDirectoryConverter(cfg) {
 			} else {
 				console.log(fileName+" file was saved!");
 			}
-		});		
+		});
 	}
 
 	return {
