@@ -8,16 +8,40 @@ function csv2jsonDirectoryConverter(cfg) {
 	var fs = require('fs');
 	// we should install csv module for node!
 	var parse = require('csv-parse');
-	// we should install yamljsyamljs module for node!
-	var yamljs = require('yamljs');
 
 	var inputFiles = [];
 	var resource = {};
 	var languages = [];
 	var csvDir = cfg.inputCsvDirectory || 'input_csv';
 	var jsonDir = cfg.outputJsonDirectory || 'output_json';
-	var ymlDir = cfg.outputYmlDirectory || 'output_yml';
 
+	function readDir() {
+		fs.readdir(csvDir, processFiles);
+	}
+
+	function processFiles(err, files) {
+		if (err) {
+			throw err;
+		}
+		inputFiles = files.filter(s => s.includes('.csv'));
+		console.log('starting conversion');
+		while(processNextFile()) {}
+	}
+
+	function processNextFile() {
+		var fileName = "";
+		console.log('files remaining: ' + inputFiles.length);
+		if (!inputFiles.length) {
+			return false;
+		}
+		fileName = inputFiles.pop();
+		var fileLang = fileName.substring(0, fileName.length - 4);
+		languages = [fileLang];
+		console.log('reading ' + fileName + ' for lang code ' + fileLang);
+		fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
+		return true;
+	}
+	
 	var parser = parse({delimiter: ','}, function(err, data) {
 		if(err) {
 			console.log(err);
@@ -80,6 +104,14 @@ function csv2jsonDirectoryConverter(cfg) {
 		}
 	}
 
+	function saveResults() {
+		var lang = {};
+		for(lang in resource) {
+			console.log('saving language: ' + lang);
+  		saveFile(jsonDir, lang+'.json', JSON.stringify(resource[lang], null, " "));
+		}
+	}
+	
 	function saveFile(dir, fileName, data) {
 		fs.writeFile(path.join(dir, fileName), data, function(err) {
 			if(err) {
@@ -88,50 +120,6 @@ function csv2jsonDirectoryConverter(cfg) {
 				console.log(fileName+" file was saved!");
 			}
 		});		
-	}
-
-	function saveLanguage(langName, langObj) {
-		saveFile(jsonDir, langName+'.json', JSON.stringify(langObj, null, " "));
-		/* do not save yaml
-		saveFile(jsonDir, langName+'.json', JSON.stringify(langObj['translation'], null, " "));
-		var tmpObj = {};
-		tmpObj[langName] = langObj['translation'];
-		saveFile(ymlDir, langName+'.yml', '---\n'+yamljs.stringify(tmpObj, 4));
-		*/
-	}
-	
-	function saveResults() {
-		var lang = {};
-		for(lang in resource) {
-			console.log('saving language: ' + lang);
-			saveLanguage(lang, resource[lang]);
-		}
-	}
-	
-	function processNextFile() {
-		var fileName = "";
-		console.log('files remaining: ' + inputFiles.length);
-		if (!inputFiles.length) {
-			return false;
-		}
-		fileName = inputFiles.pop();
-		languages = [];
-		console.log('reading ' + fileName);
-		fs.createReadStream(path.join(csvDir, fileName)).pipe(parser);
-		return true;
-	}
-	
-	function processFiles(err, files) {
-		if (err) {
-			throw err;
-		}
-		inputFiles = files.filter(s => s.includes('.csv'));
-		console.log('starting conversion');
-		while(processNextFile()) {}
-	}
-
-	function readDir() {
-		fs.readdir(csvDir, processFiles);
 	}
 
 	return {
