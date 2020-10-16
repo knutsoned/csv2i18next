@@ -81,7 +81,7 @@ function csv2jsonDirectoryConverter(cfg) {
 			currentValue = resource[languages[i]]['translation'];
 			for(var j=0; j<keysArr.length; j++) {
 				prevValue = currentValue;
-				lastKey = keysArr[j];
+				lastKey = keysArr[j].trim();
 				if (! prevValue[lastKey] ) {
 					prevValue[lastKey] = {};
 				}
